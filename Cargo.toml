@@ -1,0 +1,16 @@
+[package]
+name = "lfbe-about"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+gtk4 = "0.9"
+libadwaita = { version = "0.7", features = ["v1_6"] }
+gettext-rs = { version = "0.7", features = ["gettext-system"] }
+
+[profile.release]
+opt-level = "z"   # Optymalizacja pod rozmiar binarki
+lto = true        # Link Time Optimization (usuwa nieużywany kod z bibliotek)
+codegen-units = 1 # Lepsza optymalizacja kosztem czasu kompilacji
+panic = "abort"   # Usuwa mechanizmy odwijania stosu (unwinding)
+strip = true
