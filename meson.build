@@ -1,4 +1,4 @@
-project('lfbe-about', 'rust', version: '1.0.0alpha')
+project('lfbe-about', 'rust', version: '1.0.0')
 
 i18n = import('i18n')
 install_data(
