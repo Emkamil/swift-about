@@ -5,8 +5,8 @@ Summary:        LFBE About Dialog
 License:        GPL-3.0-or-later
 URL:            https://github.com/Emkamil/lfbe-about
 
-# Dynamiczne źródło generowane przez rpkg
-Source:         %{name}-%{version}.tar.gz
+# Kluczowa zmiana: używamy makra Source0, które COPR/rpkg wypełni automatycznie
+Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  cargo
 BuildRequires:  rust
@@ -18,35 +18,38 @@ BuildRequires:  gettext
 Modern about dialog for LFBE.
 
 %prep
-# Używamy -n %{name}, ponieważ rpkg zazwyczaj pakuje do folderu o nazwie projektu bez wersji
-%autosetup -n %{name}
+# Jeśli rpkg pakuje pliki bezpośrednio w archiwum (bez folderu nadrzędnego),
+# używamy -c, aby rpmbuild sam stworzył katalog roboczy.
+%setup -q -c -n %{name}-%{version}
 
 %build
-# Kompilacja binarnego pliku w trybie release
+# Wchodzimy do katalogu źródłowego (jeśli -c stworzył dodatkowy poziom)
+# rpkg często wypakowuje kod do podkatalogu o nazwie projektu
+cd %{name} || cd .
 cargo build --release --locked
 
 %install
+# Przejście do katalogu budowania (na wypadek specyficznej struktury rpkg)
+cd %{name} || cd .
+
 # 1. Instalacja binarki
 install -D -m 0755 target/release/lfbe-about %{buildroot}%{_bindir}/lfbe-about
 
-# 2. Instalacja licencji (zgodnie z Pana drzewem plików: data/licenses/)
+# 2. Instalacja licencji
 mkdir -p %{buildroot}%{_datadir}/lfbe/licenses
+# Zauważyłem na Pana screenie, że pliki mają końcówki .3.0.txt lub -3-clause.txt
+# Używamy gwiazdki, aby złapać wszystkie
 install -p -m 0644 data/licenses/*.txt %{buildroot}%{_datadir}/lfbe/licenses/
 
 # 3. Instalacja tłumaczeń
-# Zakładamy standardową strukturę dla języka polskiego (pl)
 mkdir -p %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES
 install -p -m 0644 po/lfbe-about.mo %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES/lfbe-about.mo
 
 %files
-# Binarka
 %{_bindir}/lfbe-about
-# Pliki danych (licencje)
 %{_datadir}/lfbe/licenses/*.txt
-# Tłumaczenia
 %{_datadir}/locale/pl/LC_MESSAGES/lfbe-about.mo
 
 %changelog
 * Sat Apr 04 2026 Kamil - 1.0.1-1
-- Fix build directory issues
-- Add support for licenses and translations installation
+- Absolute path fix for rpkg and directory traversal
