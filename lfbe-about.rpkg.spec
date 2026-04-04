@@ -17,7 +17,7 @@ BuildRequires:  gettext
 Modern about dialog for LFBE.
 
 %prep
-%autosetup -c -n %{name}
+%setup -q -c -n %{name}
 
 %build
 cargo build --release
