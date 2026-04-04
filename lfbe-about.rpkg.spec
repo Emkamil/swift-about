@@ -17,15 +17,12 @@ BuildRequires:  gettext
 Modern about dialog for LFBE.
 
 %prep
-%setup -q -n lfbe-about
+%autosetup -c -n %{name}
 
 %build
-cd %{name} || cd .
-cargo build --release --locked
+cargo build --release
 
 %install
-cd %{name} || cd .
-
 install -D -m 0755 target/release/lfbe-about %{buildroot}%{_bindir}/lfbe-about
 
 mkdir -p %{buildroot}%{_datadir}/lfbe/licenses
@@ -33,7 +30,6 @@ install -p -m 0644 data/licenses/*.txt %{buildroot}%{_datadir}/lfbe/licenses/
 
 mkdir -p %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES
 install -p -m 0644 po/lfbe-about.mo %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES/lfbe-about.mo
-
 %files
 %{_bindir}/lfbe-about
 %{_datadir}/lfbe/licenses/*.txt
