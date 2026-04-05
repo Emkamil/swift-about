@@ -23,16 +23,20 @@ Modern about dialog for Swift desktop.
 cargo build --release
 
 %install
+# Bin
 install -D -m 0755 target/release/swift-about %{buildroot}%{_bindir}/swift-about
+
+# Icons
 install -D -m 0644 res/swift-about.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/swift-about.svg
 install -D -m 0644 res/swift-about-symbolic.svg %{buildroot}%{_datadir}/icons/hicolor/symbolic/apps/swift-about-symbolic.svg
-install -D -m 0644 data/swift-about.desktop %{buildroot}%{_datadir}/applications/swift-about.desktop
 
-# Instalacja tłumaczeń z automatyzacją
+# Desktop
+install -D -m 0644 res/swift-about.desktop %{buildroot}%{_datadir}/applications/swift-about.desktop
+
+# Translates
 mkdir -p %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES
 msgfmt po/pl.po -o %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES/swift-about.mo
 
-# Generuje listę plików językowych
 %find_lang swift-about
 
 %files -f swift-about.lang
@@ -40,7 +44,7 @@ msgfmt po/pl.po -o %{buildroot}%{_datadir}/locale/pl/LC_MESSAGES/swift-about.mo
 %{_datadir}/icons/hicolor/scalable/apps/swift-about.svg
 %{_datadir}/icons/hicolor/symbolic/apps/swift-about-symbolic.svg
 %{_datadir}/applications/swift-about.desktop
-%{_datadir}/swift/licenses/*.txt
+%license res/licenses/*.txt
 
 %changelog
 * Sun Apr 05 2026 Kamil - 1.0.2-1
