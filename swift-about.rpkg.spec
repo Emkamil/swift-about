@@ -1,6 +1,6 @@
 Name:           swift-about
 Version:        1.0.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        SWIFT-desktop About Dialog
 License:        GPL-3.0-or-later
 URL:            https://github.com/Emkamil/swift-about

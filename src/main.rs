@@ -1,3 +1,19 @@
+// Copyright (C) 2026  Kamil Machowski
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 mod contributors;
 mod metadata;
 use gettextrs::*;
@@ -22,7 +38,6 @@ fn main() -> glib::ExitCode {
     let _ = bindtextdomain("swift-about", "/usr/share/locale");
     let _ = textdomain("swift-about");
 
-    // Inicjalizacja czystego GTK4
     gtk4::init().expect("Nie udało się zainicjować GTK4");
     let app = Application::builder().application_id("swift-about").build();
 
@@ -38,20 +53,16 @@ fn build_ui(app: &Application) {
         .default_height(620)
         .build();
 
-    // 1. Główny kontener
     let main_box = GtkBox::new(Orientation::Vertical, 0);
 
-    // 2. Pasek nagłówka
     let header_bar = gtk4::HeaderBar::new();
     
-    // 3. Stack (Stos widoków) - kluczowe jest ustawienie ekspansji
     let view_stack = Stack::builder()
         .transition_type(gtk4::StackTransitionType::SlideLeftRight)
         .vexpand(true)
         .hexpand(true)
         .build();
 
-    // 4. Przełącznik (Switcher)
     let view_switcher = StackSwitcher::new();
     view_stack.set_vexpand(true);
     view_stack.set_hexpand(true);
@@ -64,11 +75,8 @@ fn build_ui(app: &Application) {
     switcher_box.append(&view_switcher);
 
     header_bar.set_title_widget(Some(&switcher_box));
-    
-    // Ustawiamy pasek nagłówka jako dekorację okna (usuwa "podwójny pasek")
     window.set_titlebar(Some(&header_bar));
 
-    // 5. Kontenery dla stron - muszą się rozszerzać!
     let sys_holder = GtkBox::builder()
         .orientation(Orientation::Vertical)
         .vexpand(true) 
@@ -92,18 +100,16 @@ fn build_ui(app: &Application) {
         .hexpand(true)
         .build();
 
-    // 6. Dodawanie do stosu
     view_stack.add_titled(&sys_holder, Some("system"), &gettext("System"));
     view_stack.add_titled(&info_holder, Some("information"), &gettext("Information"));
     view_stack.add_titled(&credits_holder, Some("credits"), &gettext("Credits"));
     view_stack.add_titled(&copy_holder, Some("copyright"), &gettext("Licenses"));
 
-    // 7. Lazy Loading logic (poprawione)
+    // 7. Lazy Loading logic
     view_stack.connect_visible_child_name_notify(move |stack| {
         if let Some(name) = stack.visible_child_name() {
             if let Some(child) = stack.visible_child() {
                 let holder = child.downcast_ref::<GtkBox>().expect("Must be a GtkBox");
-                // Sprawdzamy czy kontener jest pusty
                 if holder.first_child().is_none() {
                     match name.as_str() {
                         "information" => holder.append(&create_information_page()),
@@ -116,10 +122,8 @@ fn build_ui(app: &Application) {
         }
     });
 
-    // Załadowanie pierwszej strony natychmiast
     sys_holder.append(&create_system_page());
 
-    // 8. Finalizacja układu
     main_box.append(&view_stack);
     window.set_child(Some(&main_box));
     window.present();
@@ -145,7 +149,7 @@ fn create_system_page() -> ScrolledWindow {
     let title_label = Label::builder()
         .label(&gettext("System Information"))
         .halign(Align::Start)
-        .css_classes(vec!["title-1".to_string()]) // GTK4 standard classes
+        .css_classes(vec!["title-1".to_string()])
         .build();
     content_box.append(&title_label);
 
@@ -247,9 +251,9 @@ fn create_information_page() -> ScrolledWindow {
 
     let components = vec![
         ("preferences-system-windows", "Window Manager", "labwc", "Manages the placement of windows."),
-        ("application-menu", "Panel", "swift-panel", "Provides a place for window buttons."),
-        ("preferences-other", "Desktop Manager", "swift-desktop", "Sets backgrounds and icons."),
-        ("folder", "File Manager", "nemo", "Manages files in a modern way."),
+        ("swift-panel", "Panel", "swift-panel", "Provides a place for window buttons."),
+        ("swift-desktop-view", "Desktop Manager", "swift-desktop", "Sets backgrounds and icons."),
+        ("swift-file-manager", "File Manager", "nemo", "Manages files in a modern way."),
     ];
 
     for (icon, title, app, desc_text) in components {
@@ -299,15 +303,13 @@ fn create_credits_page() -> ScrolledWindow {
         .build();
 
     for group_data in contributors::SWIFT_CONTRIBUTORS {
-    // 1. Kontener grupujący nagłówek i listę
     let group_container = GtkBox::builder()
         .orientation(Orientation::Vertical)
         .spacing(12)
-        .halign(Align::Center) // Środkujemy cały blok w oknie
-        .width_request(600)    // Narzucamy szerokość bloku (taka sama dla etykiety i listy)
+        .halign(Align::Center)
+        .width_request(600)  
         .build();
 
-    // 2. Nagłówek grupy - teraz halign(Align::Start) wyrówna go do lewej krawędzi group_container
     let group_label = Label::builder()
         .label(group_data.name)
         .halign(Align::Start) 
@@ -316,7 +318,6 @@ fn create_credits_page() -> ScrolledWindow {
     group_label.add_css_class("title-3");
     group_container.append(&group_label);
 
-    // 3. ListBox - wypełni całą szerokość group_container (czyli 450px)
     let list_box = ListBox::builder()
         .selection_mode(gtk4::SelectionMode::None)
         .css_classes(vec!["boxed-list".to_string()])
@@ -469,8 +470,7 @@ fn show_license_dialog(parent: &ApplicationWindow, license_text: &str) {
     dialog.present();
 }
 
-// Funkcje pomocnicze pozostają niemal identyczne (logika systemowa)
-fn read_os_release() -> Option<String> { /* ... identyczne jak w oryginale ... */ 
+fn read_os_release() -> Option<String> {
     let content = fs::read_to_string("/etc/os-release").ok()?;
     for line in content.lines() {
         if let Some(stripped) = line.strip_prefix("PRETTY_NAME=") {

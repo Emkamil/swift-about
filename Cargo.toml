@@ -1,15 +1,19 @@
+# Copyright (C) 2026  Kamil Machowski
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 [package]
 name = "swift-about"
-version = "1.0.2"
+version = "1.0.4-2"
 edition = "2024"
+license = "GPL-3.0-or-later"
 
 [dependencies]
 gtk4 = "0.11"
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
 
 [profile.release]
-opt-level = "z"   # Optymalizacja pod rozmiar binarki
-lto = true        # Link Time Optimization (usuwa nieużywany kod z bibliotek)
-codegen-units = 1 # Lepsza optymalizacja kosztem czasu kompilacji
-panic = "abort"   # Usuwa mechanizmy odwijania stosu (unwinding)
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
 strip = true
